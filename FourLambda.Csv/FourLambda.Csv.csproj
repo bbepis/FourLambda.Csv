@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<PackageId>FourLambda.Csv</PackageId>
+		<Description>Ultra-high performance CSV parser</Description>
+		<Version>1.0</Version>
+		<Authors>Bepis, Four Lambda Software</Authors>
+		<Company>FourLambda</Company>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+		<RepositoryUrl>https://github.com/bbepis/FourLambda.Csv</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+		<PackageTags>csv;delimited;parser;simd;performance</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="../README.md" Pack="true" PackagePath=""/>
+		<None Include="../icon.png" Pack="true" PackagePath=""/>
+	</ItemGroup>
+</Project>

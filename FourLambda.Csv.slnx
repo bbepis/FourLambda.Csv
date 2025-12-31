@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Benchmark/Benchmark.csproj" />
+  <Project Path="FourLambda.Csv/FourLambda.Csv.csproj" />
+  <Project Path="Shared/Shared.shproj" Id="8fc214a1-9d07-4fd6-a081-3bbcac4ee6fb" />
+  <Project Path="Tests/Tests.csproj" />
+</Solution>
