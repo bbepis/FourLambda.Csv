@@ -1,0 +1,132 @@
+/* --- Global styling --- */
+:root {
+  background-color: var(--page-background-color);
+  color: var(--text-color);
+  font-family: var(--text-font);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+hr {
+  border: 0;
+  border-bottom: 2px solid var(--border-color);
+  width: 100%;
+  margin: 2em 0;
+}
+
+/* --- Link styling --- */
+a {
+  color: var(--link-text-color);
+}
+a:visited {
+  color: var(--link-visited-text-color);
+}
+a:hover {
+  color: var(--link-hover-color);
+}
+
+/* --- All form controls --- */
+button, select, input, textarea {
+  font: inherit;
+  color: inherit;
+  accent-color: var(--color-highlight);
+}
+
+button:disabled,
+input:disabled::file-selector-button,
+select:disabled,
+input[type=text]:disabled,
+input[type=number]:disabled {
+  cursor: not-allowed;
+  background-color: var(--border-color);
+}
+
+input::selection,
+textarea::selection {
+  background-color: var(--color-highlight);
+  color: white;
+}
+
+/* --- Buttons & button-likes --- */
+button, input::file-selector-button, .button-element {
+  border-radius: 4px;
+  border: 1px solid transparent;
+  padding: 2px 8px;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--input-bg-color);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  outline: none;
+  accent-color: var(--color-highlight);
+}
+
+button:not(:disabled):hover, input:not(:disabled)::file-selector-button:hover {
+  border-color: var(--color-highlight);
+  background-color: var(--input-bg-color);
+}
+button:not(:disabled):active, input:not(:disabled)::file-selector-button:active {
+  border-color: var(--color-highlight);
+  background-color: var(--selected-color);
+}
+
+button:not(:disabled):focus, button:not(:disabled):focus-visible {
+  border: 1px solid var(--color-highlight);
+}
+
+/* --- Input / Select styling --- */
+input:not(:where([type=file])) {
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--border-color);
+}
+
+input:not(:disabled):focus, select:not(:disabled):focus {
+  outline: none !important;
+  border: 1px solid var(--color-highlight);
+}
+
+select, .textbox-container {
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--border-color);
+  padding: 0.25em;
+  border-radius: 0.25rem;
+}
+
+table, td {
+    border: 1px solid var(--border-color);
+    border-collapse: collapse;
+}
+
+th {
+    background-color: var(--input-bg-color);
+    font-weight: normal;
+    /* text-align: left;
+    padding-left: 3px; */
+}
+
+td {
+    padding: 3px 6px;
+}
+
+/* --- Theme --- */
+
+:root.theme-eclipse {
+	color-scheme: dark;
+	--text-color: #E4E4E4;
+	--text-font: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+	--page-background-color: #111111;
+	--input-bg-color: #222222;
+	--border-color: #474747;
+	--link-text-color: #81a2be;
+	--link-visited-text-color: #9881be;
+	--link-hover-color: #5f89ac;
+	--highlight-color: #C92626;
+	--selected-color: #311313;
+	--logo-color: #D8D8D8;
+}

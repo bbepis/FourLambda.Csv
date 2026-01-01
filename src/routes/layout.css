@@ -1,0 +1,39 @@
+@layer theme, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme inline {
+	--color-page-bg: var(--page-background-color);
+	--color-text: var(--text-color);
+	--color-highlight: var(--highlight-color);
+	--color-selected: var(--selected-color);
+	--color-box-header: var(--box-header-background-color);
+	--color-post-border: var(--border-color);
+}
+
+@utility text {
+	color: var(--text-color);
+}
+
+@utility postborder {
+	border: 1px solid var(--border-color);
+}
+
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    margin: 0;
+}
+
+.user-select-none {
+    user-select: none;
+}

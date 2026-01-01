@@ -1,0 +1,1960 @@
+{
+  "datasets": {
+    "reddit_subset.csv": {
+      "utf8size": 5501196,
+      "utf16size": 10998642,
+      "formatDesc": "22 columns, 16,781 rows",
+      "description": "'RC_2008-01.ndjson' from the Arctic Shift reddit dump converted to CSV format. Meant to represent real-world data processing, and contains a very diverse range of long, complex text."
+    },
+    "mixed_unicode.csv": {
+      "utf8size": 5768708,
+      "utf16size": 8408508,
+      "formatDesc": "4 columns, 52,524 rows",
+      "description": "'item_flavor_text.csv' from the Veekun/pokedex GitHub repo. Contains medium-length text in many different languages & scripts, with many newlines."
+    },
+    "65K_Records_Data.csv": {
+      "utf8size": 8236378,
+      "utf16size": 16472752,
+      "formatDesc": "14 columns, 65,535 rows",
+      "description": "Example CSV dataset used by MarkPflug/Benchmarks to benchmark .NET CSV libraries. Contains sample financial record data."
+    },
+    "synthetic_thin_numeric.csv": {
+      "utf8size": 938940,
+      "utf16size": 1877880,
+      "formatDesc": "4 columns, 50,000 rows",
+      "description": "An artificially generated dataset consisting of 4 columns containing integers ranging from 0 - 2000."
+    },
+    "synthetic_short_numeric.csv": {
+      "utf8size": 969,
+      "utf16size": 1938,
+      "formatDesc": "4 columns, 50 rows",
+      "description": "An artificially generated dataset consisting of 4 columns containing integers ranging from 0 - 2000. Short to show overall library overhead."
+    },
+    "synthetic_quoted_numeric.csv": {
+      "utf8size": 1339375,
+      "utf16size": 2678750,
+      "formatDesc": "4 columns, 50,000 rows",
+      "description": "An artificially generated dataset consisting of 4 columns containing integers ranging from 0 - 2000, with each column wrapped in quotation marks for escaping."
+    },
+    "synthetic_complex.csv": {
+      "utf8size": 73670909,
+      "utf16size": 140824246,
+      "formatDesc": "4 columns, 50,000 rows",
+      "description": "An artificially generated dataset consisting of 1 column with a number, and 3 containing very large escaped text designed to be extremely challenging for a parser to scan through."
+    }
+  },
+  "results": {
+    "composite": {
+      "65K_Records_Data.csv": [
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 5904789.8046875,
+          "errorNs": 102500.32700377378,
+          "allocated": 72022
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 8207264.236111111,
+          "errorNs": 29368.297453331794,
+          "allocated": 2671
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 8806000.703125,
+          "errorNs": 82624.48635634665,
+          "allocated": 496
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 5457612.890625,
+          "errorNs": 20778.493517991075,
+          "allocated": 75004
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 8202656.93359375,
+          "errorNs": 36175.35444561849,
+          "allocated": 5952
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 8978251.953125,
+          "errorNs": 12558.322879320302,
+          "allocated": 541
+        }
+      ]
+    },
+    "sum": {
+      "65K_Records_Data.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2248073.14453125,
+          "errorNs": 2174.732009776449,
+          "allocated": 2650
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2547723.6328125,
+          "errorNs": 3227.7969789471917,
+          "allocated": 72014
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2622477.0647321427,
+          "errorNs": 7903.6808219025515,
+          "allocated": 518
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 2222531.8359375,
+          "errorNs": 39.2578125,
+          "allocated": 5950
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 2430214.94140625,
+          "errorNs": 3098.8779082988412,
+          "allocated": 533
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 2508749.9348958335,
+          "errorNs": 5480.116083272287,
+          "allocated": 74989
+        }
+      ],
+      "mixed_unicode.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1077682.03125,
+          "errorNs": 964.6564552049623,
+          "allocated": 312
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1153458.3984375,
+          "errorNs": 476.56579521999413,
+          "allocated": 1470
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 4334564.322916667,
+          "errorNs": 450.4483473720085,
+          "allocated": 68970
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1214363.0078125,
+          "errorNs": 1926.5717959338278,
+          "allocated": 334
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 2846160.7421875,
+          "errorNs": 2589.827103213688,
+          "allocated": 4858
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 6010545.8984375,
+          "errorNs": 8103.416917600758,
+          "allocated": 72017
+        }
+      ],
+      "reddit_subset.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1450076.8229166667,
+          "errorNs": 626.0998250866859,
+          "allocated": 3354
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1565228.6830357143,
+          "errorNs": 4582.809141579469,
+          "allocated": 631
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 5120289.6484375,
+          "errorNs": 2936.519904075859,
+          "allocated": 75834
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1381828.857421875,
+          "errorNs": 724.834074018984,
+          "allocated": 655
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1509751.7252604167,
+          "errorNs": 3881.832926301462,
+          "allocated": 6726
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 5158455.729166667,
+          "errorNs": 2707.4195298337445,
+          "allocated": 78868
+        }
+      ],
+      "synthetic_complex.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 24411360.416666668,
+          "errorNs": 4443.398490746632,
+          "allocated": 408
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 27563659.375,
+          "errorNs": 25444.522634475856,
+          "allocated": 1532
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 42977577.08333333,
+          "errorNs": 31602.001843932503,
+          "allocated": 69228
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 22153075.0,
+          "errorNs": 18538.05708662251,
+          "allocated": 432
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 47378109.09090909,
+          "errorNs": 45367.79843662456,
+          "allocated": 5055
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 62970546.875,
+          "errorNs": 53458.54638540616,
+          "allocated": 72786
+        }
+      ],
+      "synthetic_quoted_numeric.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1064358.3984375,
+          "errorNs": 321.32396751884346,
+          "allocated": 311
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1069630.810546875,
+          "errorNs": 1042.4047923199437,
+          "allocated": 1420
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2589191.015625,
+          "errorNs": 1247.1102053704767,
+          "allocated": 68911
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1071693.9453125,
+          "errorNs": 630.1559838444894,
+          "allocated": 4720
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1514688.18359375,
+          "errorNs": 905.698146073146,
+          "allocated": 333
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 2570016.89453125,
+          "errorNs": 2953.744360613945,
+          "allocated": 71912
+        }
+      ],
+      "synthetic_short_numeric.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 962.4910990397135,
+          "errorNs": 0.43949188470631934,
+          "allocated": 1408
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2569.0248489379883,
+          "errorNs": 6.665008193736096,
+          "allocated": 68889
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 11112.081146240234,
+          "errorNs": 34.98240125477901,
+          "allocated": 304
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1059.2222595214844,
+          "errorNs": 1.9870922696139501,
+          "allocated": 4712
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1227.930196126302,
+          "errorNs": 3.1499001076751934,
+          "allocated": 8304
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 7368.060827255249,
+          "errorNs": 23.722300527319085,
+          "allocated": 328
+        }
+      ],
+      "synthetic_thin_numeric.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 756928.7760416666,
+          "errorNs": 423.11892504003794,
+          "allocated": 1412
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 780987.8069196428,
+          "errorNs": 2245.8566763784124,
+          "allocated": 307
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 836164.9088541666,
+          "errorNs": 472.5849741709536,
+          "allocated": 68896
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 785564.4775390625,
+          "errorNs": 743.3262645078127,
+          "allocated": 4715
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 832253.7353515625,
+          "errorNs": 751.0724256268669,
+          "allocated": 71900
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 870225.732421875,
+          "errorNs": 821.7427566753769,
+          "allocated": 332
+        }
+      ]
+    },
+    "skipToEnd": {
+      "65K_Records_Data.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1830737.265625,
+          "errorNs": 2352.862902549955,
+          "allocated": 2648
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2114216.11328125,
+          "errorNs": 2038.126783170352,
+          "allocated": 71996
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2276281.171875,
+          "errorNs": 5048.657990061354,
+          "allocated": 508
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1835322.216796875,
+          "errorNs": 2348.2751216153174,
+          "allocated": 526
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1855030.322265625,
+          "errorNs": 2449.3607438018053,
+          "allocated": 5942
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 2118409.5703125,
+          "errorNs": 1024.4288458180213,
+          "allocated": 74994
+        }
+      ],
+      "mixed_unicode.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 885159.5703125,
+          "errorNs": 532.0821669567512,
+          "allocated": 307
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 898900.41015625,
+          "errorNs": 1249.648187872272,
+          "allocated": 1469
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 4059100.1953125,
+          "errorNs": 3089.2606608317838,
+          "allocated": 68959
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 804581.787109375,
+          "errorNs": 785.7821448136375,
+          "allocated": 333
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 2625005.5803571427,
+          "errorNs": 7537.690599405339,
+          "allocated": 4850
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 5738592.65625,
+          "errorNs": 9305.7172354742,
+          "allocated": 72038
+        }
+      ],
+      "reddit_subset.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1360729.140625,
+          "errorNs": 3105.0561214909853,
+          "allocated": 3350
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 1484291.3671875,
+          "errorNs": 1932.8182733151953,
+          "allocated": 632
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 5049249.479166667,
+          "errorNs": 1059.8436207450736,
+          "allocated": 75835
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1248525.048828125,
+          "errorNs": 589.8160228149076,
+          "allocated": 657
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 1401878.3203125,
+          "errorNs": 624.2613229250474,
+          "allocated": 6727
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 5101840.234375,
+          "errorNs": 7268.849877250496,
+          "allocated": 78868
+        }
+      ],
+      "synthetic_complex.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 23897646.875,
+          "errorNs": 20058.40613248024,
+          "allocated": 408
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 26692399.21875,
+          "errorNs": 18771.72987252977,
+          "allocated": 1543
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 42560262.5,
+          "errorNs": 39282.32104303171,
+          "allocated": 69188
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 21476775.0,
+          "errorNs": 2006.5185113669731,
+          "allocated": 410
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 46841020.45454545,
+          "errorNs": 30694.291151572193,
+          "allocated": 5024
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 62330975.0,
+          "errorNs": 44388.8910617432,
+          "allocated": 72327
+        }
+      ],
+      "synthetic_quoted_numeric.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 670104.8177083334,
+          "errorNs": 296.9497818482519,
+          "allocated": 1412
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 703298.92578125,
+          "errorNs": 208.14629614762686,
+          "allocated": 308
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2313068.2291666665,
+          "errorNs": 923.4122272668524,
+          "allocated": 68918
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 599316.7317708334,
+          "errorNs": 149.85586588324998,
+          "allocated": 332
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 678050.87890625,
+          "errorNs": 264.6118409025288,
+          "allocated": 4718
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 2314318.359375,
+          "errorNs": 1749.7910656409267,
+          "allocated": 71914
+        }
+      ],
+      "synthetic_short_numeric.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 712.7623081207275,
+          "errorNs": 0.9691400202205283,
+          "allocated": 1408
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 2274.2305755615234,
+          "errorNs": 1.2030243424126474,
+          "allocated": 68889
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 10586.01791381836,
+          "errorNs": 58.944549085580825,
+          "allocated": 304
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 818.3867534001669,
+          "errorNs": 3.501389932724855,
+          "allocated": 4712
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 976.4930152893066,
+          "errorNs": 2.17314541730329,
+          "allocated": 8304
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 6755.958480834961,
+          "errorNs": 56.28319463773406,
+          "allocated": 328
+        }
+      ],
+      "synthetic_thin_numeric.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 400625.30517578125,
+          "errorNs": 310.23367348621025,
+          "allocated": 1409
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 401223.14453125,
+          "errorNs": 280.48027390347886,
+          "allocated": 68895
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF16"
+          ],
+          "meanNs": 446618.896484375,
+          "errorNs": 536.0198358992062,
+          "allocated": 307
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 368892.919921875,
+          "errorNs": 210.36880691669444,
+          "allocated": 330
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 396858.70361328125,
+          "errorNs": 281.63910431964996,
+          "allocated": 71899
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "UTF8"
+          ],
+          "meanNs": 400081.9010416667,
+          "errorNs": 273.1566075693127,
+          "allocated": 4713
+        }
+      ]
+    },
+    "readAll": {
+      "65K_Records_Data.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 2232178.984375,
+          "errorNs": 3649.351116454402,
+          "allocated": 2650
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 2734654.646381579,
+          "errorNs": 15066.045721451072,
+          "allocated": 496
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 2263808.6495535714,
+          "errorNs": 2341.8445897921492,
+          "allocated": 524
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 2274916.875,
+          "errorNs": 7855.607184173741,
+          "allocated": 5936
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 2717906.3939144737,
+          "errorNs": 14154.555096877597,
+          "allocated": 500
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 2961328.125,
+          "errorNs": 32529.37348631737,
+          "allocated": 2647
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 3326411.3671875,
+          "errorNs": 20185.43273926821,
+          "allocated": 72021
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 2691970.703125,
+          "errorNs": 13170.722975208419,
+          "allocated": 5945
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 3118388.0859375,
+          "errorNs": 6545.087545424781,
+          "allocated": 74997
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 7898421.484375,
+          "errorNs": 25900.62575176125,
+          "allocated": 37442480
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 8250287.59765625,
+          "errorNs": 39508.35135502066,
+          "allocated": 35870458
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 8705948.828125,
+          "errorNs": 12064.11406001197,
+          "allocated": 37514272
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 8542707.1875,
+          "errorNs": 45897.64323688471,
+          "allocated": 35873706
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 9058869.49013158,
+          "errorNs": 44719.798621000446,
+          "allocated": 37517192
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 14772339.375,
+          "errorNs": 33445.9246739408,
+          "allocated": 37442528
+        }
+      ],
+      "mixed_unicode.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 962020.8129882812,
+          "errorNs": 4609.7041662658985,
+          "allocated": 305
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 995609.21875,
+          "errorNs": 2229.12840895101,
+          "allocated": 1468
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 888641.4306640625,
+          "errorNs": 3273.4133330557606,
+          "allocated": 328
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 2841165.078125,
+          "errorNs": 5485.202863031448,
+          "allocated": 4848
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 981814.0727796053,
+          "errorNs": 5229.391843309466,
+          "allocated": 1419
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 1067426.123046875,
+          "errorNs": 1844.7050483166634,
+          "allocated": 1464
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 3993725.15625,
+          "errorNs": 6405.778161930175,
+          "allocated": 69501
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 2902969.140625,
+          "errorNs": 6259.606607525863,
+          "allocated": 4854
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 5863768.489583333,
+          "errorNs": 16309.409826970437,
+          "allocated": 72530
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 2445378.466796875,
+          "errorNs": 10517.512933697284,
+          "allocated": 12027565
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 2540703.0208333335,
+          "errorNs": 12168.404404204388,
+          "allocated": 13120735
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 5787179.166666667,
+          "errorNs": 16621.537313431963,
+          "allocated": 13189003
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 4628837.1875,
+          "errorNs": 52903.80584186828,
+          "allocated": 12030951
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 6576358.59375,
+          "errorNs": 19744.01228588786,
+          "allocated": 13119643
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 7828699.869791667,
+          "errorNs": 51082.700217872334,
+          "allocated": 13192010
+        }
+      ],
+      "reddit_subset.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 1530078.1901041667,
+          "errorNs": 4331.942241494604,
+          "allocated": 3347
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 1634469.5134943181,
+          "errorNs": 7004.278694165008,
+          "allocated": 627
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 1391966.4813701923,
+          "errorNs": 4373.754127514888,
+          "allocated": 651
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 1695392.564174107,
+          "errorNs": 7521.441393249004,
+          "allocated": 6720
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 2168557.3567708335,
+          "errorNs": 9326.500786956618,
+          "allocated": 2195980
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 2307098.8839285714,
+          "errorNs": 2240.4483294420884,
+          "allocated": 3344
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 5942635.7421875,
+          "errorNs": 20175.978163663385,
+          "allocated": 179741
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 2317855.46875,
+          "errorNs": 704.9287122391829,
+          "allocated": 6733
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 5883977.008928572,
+          "errorNs": 17732.39928361104,
+          "allocated": 182766
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 4491823.828125,
+          "errorNs": 11917.156495028581,
+          "allocated": 16929197
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 4643288.225446428,
+          "errorNs": 20994.979963384805,
+          "allocated": 21000621
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 8513148.125,
+          "errorNs": 18090.253665594268,
+          "allocated": 18984594
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 4720934.716796875,
+          "errorNs": 22001.92714341942,
+          "allocated": 16932570
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 7830832.8125,
+          "errorNs": 29469.743647270723,
+          "allocated": 18805290
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 8718501.71875,
+          "errorNs": 34673.42526675545,
+          "allocated": 18987618
+        }
+      ],
+      "synthetic_complex.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 24271853.90625,
+          "errorNs": 35338.8727886492,
+          "allocated": 367
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 28055343.75,
+          "errorNs": 5035.404922583188,
+          "allocated": 1441
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 21801194.19642857,
+          "errorNs": 34424.39285171157,
+          "allocated": 475
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 50506333.766233765,
+          "errorNs": 219195.46895710184,
+          "allocated": 4845
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 52154726.25,
+          "errorNs": 145256.17289486376,
+          "allocated": 127710686
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 61066023.21428572,
+          "errorNs": 78436.85635424456,
+          "allocated": 1618
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 70889676.5625,
+          "errorNs": 238403.9278981427,
+          "allocated": 113222
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 84856675.3246753,
+          "errorNs": 346012.48486859276,
+          "allocated": 5257
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 92467310.00000001,
+          "errorNs": 150298.0104104289,
+          "allocated": 116163
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 59486339.18128655,
+          "errorNs": 311325.30091984145,
+          "allocated": 267037643
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 71023675.51020409,
+          "errorNs": 334764.3010443446,
+          "allocated": 139315721
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 79785160.71428572,
+          "errorNs": 99988.17878684013,
+          "allocated": 139439801
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 71884375.71428572,
+          "errorNs": 253977.1657925006,
+          "allocated": 139327433
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 92762234.84848486,
+          "errorNs": 318811.630567525,
+          "allocated": 139319184
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 103052282.0,
+          "errorNs": 421276.744284693,
+          "allocated": 139442853
+        }
+      ],
+      "synthetic_quoted_numeric.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 735302.44140625,
+          "errorNs": 3622.2658341106303,
+          "allocated": 306
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 745665.09765625,
+          "errorNs": 1471.078142874447,
+          "allocated": 1408
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 645410.546875,
+          "errorNs": 1206.678129522839,
+          "allocated": 331
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 755300.37109375,
+          "errorNs": 1721.6177761463923,
+          "allocated": 4714
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 796340.8528645834,
+          "errorNs": 1854.4093085695454,
+          "allocated": 306
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 879757.3025173611,
+          "errorNs": 3312.7921768815017,
+          "allocated": 1409
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 2599364.74609375,
+          "errorNs": 3671.6263711501415,
+          "allocated": 68906
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 889917.529296875,
+          "errorNs": 3697.610963841905,
+          "allocated": 4717
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 2633931.7708333335,
+          "errorNs": 12613.214063154433,
+          "allocated": 71912
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 2338518.5546875,
+          "errorNs": 2291.313500212066,
+          "allocated": 6392126
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 2491343.26171875,
+          "errorNs": 3177.3721574086053,
+          "allocated": 6368686
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 3654887.109375,
+          "errorNs": 12498.467163270927,
+          "allocated": 6460822
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 2504280.1339285714,
+          "errorNs": 10674.386801948009,
+          "allocated": 6371985
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 3526190.625,
+          "errorNs": 1149.3997859581375,
+          "allocated": 6463803
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 4262841.666666667,
+          "errorNs": 1464.4860211344082,
+          "allocated": 6392147
+        }
+      ],
+      "synthetic_short_numeric.csv": [
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 628.2325608389718,
+          "errorNs": 2.894359367612964,
+          "allocated": 304
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 729.8194249471029,
+          "errorNs": 3.446987256097966,
+          "allocated": 1408
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 577.2028229453347,
+          "errorNs": 2.3628355509090753,
+          "allocated": 328
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 906.761099742009,
+          "errorNs": 3.891399537220058,
+          "allocated": 4712
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 621.0314750671387,
+          "errorNs": 0.8410559158769685,
+          "allocated": 304
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 871.3909943898519,
+          "errorNs": 3.915462460609182,
+          "allocated": 1408
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 2676.7906427383423,
+          "errorNs": 12.61058961089316,
+          "allocated": 68889
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 1023.5242207845052,
+          "errorNs": 4.589532231442268,
+          "allocated": 4712
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 1254.8629866706,
+          "errorNs": 4.696966286027805,
+          "allocated": 8304
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 1556.8412399291992,
+          "errorNs": 3.580816965749402,
+          "allocated": 6688
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 1783.9452457427979,
+          "errorNs": 9.716184597995246,
+          "allocated": 7744
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 3539.4792556762695,
+          "errorNs": 4.849434971692052,
+          "allocated": 75273
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 1966.7336183435777,
+          "errorNs": 9.473069158041847,
+          "allocated": 11048
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 2142.6658966962027,
+          "errorNs": 15.43297999047153,
+          "allocated": 14688
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 2731.5183639526367,
+          "errorNs": 3.829895643755816,
+          "allocated": 6712
+        }
+      ],
+      "synthetic_thin_numeric.csv": [
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 473799.8116629464,
+          "errorNs": 756.1796551541069,
+          "allocated": 1408
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF16"
+          ],
+          "meanNs": 489202.3388671875,
+          "errorNs": 1990.5913581507223,
+          "allocated": 304
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 434550.2263849432,
+          "errorNs": 1705.0424519935123,
+          "allocated": 328
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span-raw",
+            "UTF8"
+          ],
+          "meanNs": 500221.4518229167,
+          "errorNs": 56.56829307867155,
+          "allocated": 4712
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 480731.787109375,
+          "errorNs": 759.9742215891847,
+          "allocated": 304
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 571326.1962890625,
+          "errorNs": 680.3052497761303,
+          "allocated": 1410
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF16"
+          ],
+          "meanNs": 626350.1598011364,
+          "errorNs": 2070.0311569827954,
+          "allocated": 68894
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 576242.87109375,
+          "errorNs": 796.1889872987371,
+          "allocated": 4713
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "span",
+            "UTF8"
+          ],
+          "meanNs": 621660.4073660715,
+          "errorNs": 936.0072360621568,
+          "allocated": 71899
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 2045309.609375,
+          "errorNs": 4345.78916979423,
+          "allocated": 6392361
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 2175060.049715909,
+          "errorNs": 8505.072481979518,
+          "allocated": 6369646
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF16"
+          ],
+          "meanNs": 2275385.4631696427,
+          "errorNs": 6324.545200920143,
+          "allocated": 6461059
+        },
+        {
+          "library": "Sep",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 2158842.578125,
+          "errorNs": 6068.952033151354,
+          "allocated": 6372941
+        },
+        {
+          "library": "Sylvan.Data.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 2185818.359375,
+          "errorNs": 2884.8808575142943,
+          "allocated": 6464046
+        },
+        {
+          "library": "FourLambda.Csv",
+          "properties": [
+            "string",
+            "UTF8"
+          ],
+          "meanNs": 3147546.484375,
+          "errorNs": 1950.5949172519931,
+          "allocated": 6392401
+        }
+      ]
+    }
+  }
+}
