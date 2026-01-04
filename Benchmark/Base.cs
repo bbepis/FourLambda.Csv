@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using FourLambda.Csv;
 
 namespace Benchmark;
 

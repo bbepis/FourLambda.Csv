@@ -8,7 +8,7 @@ namespace FourLambda.Csv;
 /// <summary>
 /// High-performance CSV reader that accepts UTF-16 data.
 /// </summary>
-public sealed unsafe class CsvReaderUtf16 : IDisposable
+public sealed unsafe class CsvReaderUtf16 : ICsvReader
 {
 	private readonly TextReader reader;
 	private int currentBufferSize;
@@ -27,9 +27,7 @@ public sealed unsafe class CsvReaderUtf16 : IDisposable
 	private readonly int maxBufferSize;
 	private Span<char> BufferSpan => new(bufferPtr, bufferSize);
 
-	/// <summary>
-	/// Gets the count of fields in the current line.
-	/// </summary>
+	/// <inheritdoc/>
 	public int FieldCount => fieldCount;
 
 	/// <summary>
@@ -76,10 +74,7 @@ public sealed unsafe class CsvReaderUtf16 : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	/// <summary>
-	/// Reads the next line of the CSV stream and updates the internal state.
-	/// </summary>
-	/// <returns>True if a line was successfully read; otherwise, false.</returns>
+	/// <inheritdoc/>
 	public bool ReadNext()
 	{
 		if (bufferPtr == (char*)0)
@@ -151,43 +146,54 @@ public sealed unsafe class CsvReaderUtf16 : IDisposable
 			throw new ArgumentOutOfRangeException(nameof(field), $"Field {field} is greater than the actual range of fields for the line ({fieldCount})");
 	}
 
-	/// <summary>
-	/// Retrieves the memory span of the specified field, unescaping if necessary. An allocation is required for unescaping; otherwise the returned <see cref="ReadOnlyMemory{char}"/> is invalid after <see cref="ReadNext"/> is called again.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The memory span of the specified field.</returns>
+	/// <inheritdoc/>
 	public string GetString(int field)
 	{
 		return new string(GetSpan(field));
 	}
 
-	/// <summary>
-	/// Parses the specified field to the specified type. Type must implement <see cref="ISpanParsable{T}"/>.
-	/// </summary>
-	/// <typeparam name="T">The type to parse as.</typeparam>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The parsed value of the specified field.</returns>
+	/// <inheritdoc/>
 	public T Parse<T>(int field) where T : ISpanParsable<T>
 	{
-		// TODO: add branch to check if field is escaped and use stackalloc instead
-		return T.Parse(GetSpan(field), null);
+		if (TryGetUnescapedSpanFast(field, out var info, out var span))
+			T.Parse(span, null);
+
+		Span<char> buffer = stackalloc char[info.length];
+		int length = UnescapeField(buffer, info);
+
+		return T.Parse(buffer.Slice(0, length), null);
 	}
 
-	/// <summary>
-	/// Returns a value specifying if the field needs to be escaped, and the raw length of the field. If the field is escaped, <see cref="rawLength"/> can be considered the upper bound of the length of the unescaped value. Otherwise, <see cref="rawLength"/> is the length of the unescaped value.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve information about.</param>
-	/// <param name="rawLength">If the field is escaped, <see cref="rawLength"/> can be considered the upper bound of the length of the unescaped value. Otherwise, <see cref="rawLength"/> is the length of the unescaped value.</param>
-	/// <returns>If the field needs to be unescaped.</returns>
+	/// <inheritdoc/>
 	public bool NeedsEscape(int field, out int rawLength)
 	{
 		FieldCheck(field);
 		var info = fieldInfo[field];
 		rawLength = info.length;
-		return info.escapedCount > 3;
+		return info.escapedCount > 0;
 	}
 
-	// TODO: create hybrid public Span<char> WriteToSpan(int field, Span<char> buffer, out int written)
+	private bool TryGetUnescapedSpanFast(int field, out (int offset, int length, byte escapedCount) info, out Span<char> span)
+	{
+		FieldCheck(field);
+		info = fieldInfo[field];
+
+		if (info.escapedCount == 0)
+		{
+			span = new Span<char>(bufferPtr + info.offset, info.length);
+			return true;
+		}
+
+		// since we don't need to worry about UTF conversion, we can just do a quick shortcut to find out if this column only has a simple escape, and then just return the contents between them
+		if (info.escapedCount == 3 && bufferPtr[info.offset] == '\"' && bufferPtr[info.offset + info.length - 1] == '\"')
+		{
+			span = new Span<char>(bufferPtr + info.offset + 1, info.length - 2);
+			return true;
+		}
+
+		span = default;
+		return false;
+	}
 
 	/// <summary>
 	/// Copies the data from the specified field directly to the destination <see cref="Span{char}"/>, unescaping if necessary. Returns the written amount of chars. If you need to copy data from this field into another span, this method is always faster than using <see cref="GetSpan"/>.
@@ -197,45 +203,24 @@ public sealed unsafe class CsvReaderUtf16 : IDisposable
 	/// <returns>The written amount of chars.</returns>
 	public int WriteToSpan(int field, Span<char> destination)
 	{
-		FieldCheck(field);
-		var info = fieldInfo[field];
-
-		if (info.escapedCount == 0)
+		if (TryGetUnescapedSpanFast(field, out var info, out var span))
 		{
-			new Span<char>(bufferPtr + info.offset, info.length).CopyTo(destination);
-			return info.length;
-		}
-
-		// since we don't need to worry about UTF conversion, we can just do a quick shortcut to find out if this column only has a simple escape, and then just return the contents between them
-		if (info.escapedCount == 3 && bufferPtr[info.offset] == '\"' && bufferPtr[info.offset + info.length - 1] == '\"')
-		{
-			new Span<char>(bufferPtr + info.offset + 1, info.length - 2).CopyTo(destination);
-			return info.length - 2;
+			span.CopyTo(destination);
+			return span.Length;
 		}
 
 		return UnescapeField(destination, info);
 	}
 
 	/// <summary>
-	/// Retrieves the specified field as a <see cref="Span{char}"/>, unescaping if necessary. If the field doesn't need unescaping, then this method is extremely fast and requires no allocations.
+	/// Retrieves the specified field as a <see cref="Span{char}"/>, unescaping if necessary. If the field doesn't need unescaping, then this method is extremely fast and requires no allocations (but is invalid after <see cref="ReadNext"/> is called again).
 	/// </summary>
 	/// <param name="field">The index of the field to retrieve.</param>
 	/// <returns>The unescaped text data of the specified field.</returns>
 	public ReadOnlySpan<char> GetSpan(int field)
 	{
-		FieldCheck(field);
-		var info = fieldInfo[field];
-
-		if (info.escapedCount == 0)
-		{
-			return new Span<char>(bufferPtr + info.offset, info.length);
-		}
-
-		// since we don't need to worry about UTF conversion, we can just do a quick shortcut to find out if this column only has a simple escape, and then just return the contents between them
-		if (info.escapedCount == 3 && bufferPtr[info.offset] == '\"' && bufferPtr[info.offset + info.length - 1] == '\"')
-		{
-			return new Span<char>(bufferPtr + info.offset + 1, info.length - 2);
-		}
+		if (TryGetUnescapedSpanFast(field, out var info, out var span))
+			return span;
 
 		Span<char> buffer = new char[info.length];
 		var length = UnescapeField(buffer, info);
@@ -248,7 +233,7 @@ public sealed unsafe class CsvReaderUtf16 : IDisposable
 	/// </summary>
 	/// <param name="field">The index of the field to retrieve.</param>
 	/// <returns>The text data of the specified field.</returns>
-	public ReadOnlySpan<char> GetRawSpan(int field)
+	public ReadOnlySpan<char> GetSpanRaw(int field)
 	{
 		FieldCheck(field);
 		var info = fieldInfo[field];
@@ -256,60 +241,28 @@ public sealed unsafe class CsvReaderUtf16 : IDisposable
 		return new Span<char>(bufferPtr + info.offset, info.length);
 	}
 
-	/// <summary>
-	/// Retrieves the specified field as an integer, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The integer value of the specified field.</returns>
+	/// <inheritdoc/>
 	public int GetInt32(int field) => Parse<int>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as an unsigned integer, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The unsigned integer value of the specified field.</returns>
+	/// <inheritdoc/>
 	public uint GetUInt32(int field) => Parse<uint>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a long, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The long value of the specified field.</returns>
+	/// <inheritdoc/>
 	public long GetInt64(int field) => Parse<long>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as an unsigned long, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The unsigned long value of the specified field.</returns>
+	/// <inheritdoc/>
 	public ulong GetUInt64(int field) => Parse<ulong>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a float, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The float value of the specified field.</returns>
+	/// <inheritdoc/>
 	public float GetFloat(int field) => Parse<float>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a double, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The double value of the specified field.</returns>
+	/// <inheritdoc/>
 	public double GetDouble(int field) => Parse<double>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a decimal, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The decimal value of the specified field.</returns>
+	/// <inheritdoc/>
 	public decimal GetDecimal(int field) => Parse<decimal>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a DateTime, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The DateTime value of the specified field.</returns>
+	/// <inheritdoc/>
 	public DateTime GetDateTime(int field) => Parse<DateTime>(field);
 
 	private int DetermineFields(int bufferOffset)

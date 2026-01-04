@@ -53,7 +53,7 @@ public class CompareTests
 				var actual = lambdaReader.GetString(i);
 				Assert.That(actual, Is.EqualTo(expected));
 
-				var rawLength = lambdaReader.GetSpanRaw(i).Length;
+				lambdaReader.NeedsEscape(i, out var rawLength);
 
 				using var charBuffer = MemoryPool<char>.Shared.Rent(rawLength);
 				var written = lambdaReader.WriteToSpan(i, charBuffer.Memory.Span);

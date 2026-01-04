@@ -10,7 +10,7 @@ namespace FourLambda.Csv;
 /// <summary>
 /// High-performance CSV reader that accepts UTF-8 data.
 /// </summary>
-public sealed unsafe class CsvReaderUtf8 : IDisposable
+public sealed unsafe class CsvReaderUtf8 : ICsvReader
 {
 	private readonly Stream stream;
 	private int currentBufferSize;
@@ -33,15 +33,13 @@ public sealed unsafe class CsvReaderUtf8 : IDisposable
 
 	private Span<byte> BufferSpan => new Span<byte>(bufferPtr, bufferSize);
 
-	/// <summary>
-	/// Gets the count of fields in the current line.
-	/// </summary>
+	/// <inheritdoc/>
 	public int FieldCount => fieldCount;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="CsvReaderUtf8"/> class. Uses Avx2 hardware instructions.
 	/// </summary>
-	/// <param name="stream">The stream containing the DSV data.</param>
+	/// <param name="stream">The stream containing the CSV data.</param>
 	/// <param name="lineBufferSize">The size of the buffer used to store lines of text as they get processed. Lines will be read incorrectly if they are larger than this buffer.</param>
 	/// <param name="maxFieldCount">The maximum number of fields expected in a line.</param>
 	public CsvReaderUtf8(Stream stream, int lineBufferSize = 32 * 1024, int maxFieldCount = 256)
@@ -83,10 +81,7 @@ public sealed unsafe class CsvReaderUtf8 : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	/// <summary>
-	/// Reads the next line of the CSV stream and updates the internal state.
-	/// </summary>
-	/// <returns>True if a line was successfully read; otherwise, false.</returns>
+	/// <inheritdoc/>
 	public bool ReadNext()
 	{
 		if (bufferPtr == (byte*)IntPtr.Zero)
@@ -116,6 +111,11 @@ public sealed unsafe class CsvReaderUtf8 : IDisposable
 			// reached the end without encountering a newline
 			currentBufferSize = bufferSize - currentBufferOffset;
 			return currentBufferSize != 0;
+		}
+
+		if (currentBufferOffset == 0)
+		{
+			throw new InternalBufferOverflowException("Supplied line buffer is too small to handle this CSV file. Try increasing lineBufferSize in the constructor");
 		}
 
 		endByte = bufferSize - currentBufferOffset;
@@ -167,13 +167,25 @@ public sealed unsafe class CsvReaderUtf8 : IDisposable
 			throw new ArgumentOutOfRangeException(nameof(field), $"Field {field} is greater than the actual range of fields for the line ({fieldCount})");
 	}
 
+	/// <inheritdoc/>
+	public T Parse<T>(int field) where T : ISpanParsable<T>
+	{
+		FieldCheck(field);
+		var info = fieldInfo[field];
+
+		Span<char> buffer = stackalloc char[info.length];
+		var length = UnescapeField(buffer, info);
+
+		return T.Parse(buffer.Slice(0, length), null);
+	}
+
 	/// <summary>
 	/// Parses the specified field to the specified type. Type must implement <see cref="IUtf8SpanParsable{T}"/> and <see cref="ISpanParsable{T}"/>.
 	/// </summary>
 	/// <typeparam name="T">The type to parse as.</typeparam>
 	/// <param name="field">The index of the field to retrieve.</param>
 	/// <returns>The parsed value of the specified field.</returns>
-	public T Parse<T>(int field) where T : IUtf8SpanParsable<T>, ISpanParsable<T>
+	public T ParseUtf8<T>(int field) where T : IUtf8SpanParsable<T>, ISpanParsable<T>
 	{
 		FieldCheck(field);
 		var info = fieldInfo[field];
@@ -187,12 +199,16 @@ public sealed unsafe class CsvReaderUtf8 : IDisposable
 		return T.Parse(buffer.Slice(0, length), null);
 	}
 
-	/// <summary>
-	/// Copies the data from the specified field directly to the destination <see cref="Span{char}"/>, unescaping if necessary. Returns the written amount of chars.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <param name="destination">The destination <see cref="Span{char}"/> to copy chars to.</param>
-	/// <returns>The written amount of chars.</returns>
+	/// <inheritdoc/>
+	public bool NeedsEscape(int field, out int rawLength)
+	{
+		FieldCheck(field);
+		var info = fieldInfo[field];
+		rawLength = info.length;
+		return info.isEscaped;
+	}
+
+	/// <inheritdoc/>
 	public int WriteToSpan(int field, Span<char> destination)
 	{
 		FieldCheck(field);
@@ -214,11 +230,7 @@ public sealed unsafe class CsvReaderUtf8 : IDisposable
 		return new Span<byte>(bufferPtr + info.offset, info.length);
 	}
 
-	/// <summary>
-	/// Retrieves the specified field as a string, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The string value of the specified field.</returns>
+	/// <inheritdoc/>
 	public string GetString(int field)
 	{
 		FieldCheck(field);
@@ -233,60 +245,28 @@ public sealed unsafe class CsvReaderUtf8 : IDisposable
 		return new string(buffer.Slice(0, length));
 	}
 
-	/// <summary>
-	/// Retrieves the specified field as a 32-bit integer, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The integer value of the specified field.</returns>
-	public int GetInt32(int field) => Parse<int>(field);
+	/// <inheritdoc/>
+	public int GetInt32(int field) => ParseUtf8<int>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as an unsigned 32-bit integer, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The unsigned integer value of the specified field.</returns>
-	public uint GetUInt32(int field) => Parse<uint>(field);
+	/// <inheritdoc/>
+	public uint GetUInt32(int field) => ParseUtf8<uint>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a long, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The long value of the specified field.</returns>
-	public long GetInt64(int field) => Parse<long>(field);
+	/// <inheritdoc/>
+	public long GetInt64(int field) => ParseUtf8<long>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as an unsigned long, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The unsigned long value of the specified field.</returns>
-	public ulong GetUInt64(int field) => Parse<ulong>(field);
+	/// <inheritdoc/>
+	public ulong GetUInt64(int field) => ParseUtf8<ulong>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a float, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The float value of the specified field.</returns>
-	public float GetFloat(int field) => Parse<float>(field);
+	/// <inheritdoc/>
+	public float GetFloat(int field) => ParseUtf8<float>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a double, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The double value of the specified field.</returns>
-	public double GetDouble(int field) => Parse<double>(field);
+	/// <inheritdoc/>
+	public double GetDouble(int field) => ParseUtf8<double>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a decimal, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The decimal value of the specified field.</returns>
-	public decimal GetDecimal(int field) => Parse<decimal>(field);
+	/// <inheritdoc/>
+	public decimal GetDecimal(int field) => ParseUtf8<decimal>(field);
 
-	/// <summary>
-	/// Retrieves the specified field as a DateTime, unescaping if necessary.
-	/// </summary>
-	/// <param name="field">The index of the field to retrieve.</param>
-	/// <returns>The DateTime value of the specified field.</returns>
+	/// <inheritdoc/>
 	public DateTime GetDateTime(int field)
 	{
 		var info = fieldInfo[field];
