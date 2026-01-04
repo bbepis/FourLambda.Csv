@@ -19,6 +19,8 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	private readonly (int offset, int length, bool isEscaped)[] fieldInfo;
 	private int fieldCount = 0;
 
+	private readonly char separatorChar;
+
 	private readonly Vector256<byte> separatorVector;
 	private readonly Vector256<byte> escapeVector;
 	private readonly Vector256<byte> newlineVector;
@@ -36,13 +38,18 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	/// <inheritdoc/>
 	public int FieldCount => fieldCount;
 
+	/// <inheritdoc/>
+	public IReadOnlyDictionary<string, int>? Headers { get; private set; }
+
 	/// <summary>
 	/// Initializes a new instance of the <see cref="CsvReaderUtf8"/> class. Uses Avx2 hardware instructions.
 	/// </summary>
 	/// <param name="stream">The stream containing the CSV data.</param>
+	/// <param name="hasHeaders">Whether the supplied CSV file has headers; if true, they'll be loaded into the <see cref="Headers"/> property.</param>s
 	/// <param name="lineBufferSize">The size of the buffer used to store lines of text as they get processed. Lines will be read incorrectly if they are larger than this buffer.</param>
 	/// <param name="maxFieldCount">The maximum number of fields expected in a line.</param>
-	public CsvReaderUtf8(Stream stream, int lineBufferSize = 32 * 1024, int maxFieldCount = 256)
+	/// <param name="separatorChar">The character that separates fields for the supplied CSV file.</param>
+	public CsvReaderUtf8(Stream stream, bool hasHeaders = false, int lineBufferSize = 32 * 1024, int maxFieldCount = 256, char separatorChar = ',')
 	{
 		this.stream = stream;
 
@@ -51,15 +58,30 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 
 		fieldInfo = new (int offset, int length, bool isEscaped)[maxFieldCount];
 
+		if ((ushort)separatorChar > 127)
+			throw new ArgumentOutOfRangeException(nameof(separatorChar), "Separator character must be within ASCII range.");
+
+		this.separatorChar = separatorChar;
+
 		if (Avx2.IsSupported)
 		{
-			separatorVector = Vector256.Create((byte)',');
+			separatorVector = Vector256.Create((byte)separatorChar);
 			newlineVector = Vector256.Create((byte)'\n');
 			escapeVector = Vector256.Create((byte)'\"');
 		}
 
 		//if (lineEndChar == '\n')
 		crPadding = -1;
+
+		if (hasHeaders && ReadNext())
+		{
+			var headerDictionary = new Dictionary<string, int>(FieldCount);
+
+			for (int i = 0; i < FieldCount; i++)
+				headerDictionary[GetString(i)] = i;
+
+			Headers = headerDictionary;
+		}
 	}
 
 	~CsvReaderUtf8()
@@ -180,7 +202,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	}
 
 	/// <summary>
-	/// Parses the specified field to the specified type. Type must implement <see cref="IUtf8SpanParsable{T}"/> and <see cref="ISpanParsable{T}"/>.
+	/// Parses the specified field to the specified type. Type must implement <see cref="IUtf8SpanParsable{T}"/> and <see cref="ISpanParsable{T}"/>. Prefer this over the regular <see cref="Parse"/> where possible, as this doesn't require expansion to UTF-16 first if the field doesn't need to be escaped.
 	/// </summary>
 	/// <typeparam name="T">The type to parse as.</typeparam>
 	/// <param name="field">The index of the field to retrieve.</param>
@@ -300,17 +322,16 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 			{
 				var dataVector = Avx.LoadVector256(bufferPtr + i);
 
+				nuint separatorMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, separatorVector));
+				nuint escapeMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, escapeVector));
+				nuint newlineMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, newlineVector));
 
-				uint separatorMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, separatorVector));
-				uint escapeMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, escapeVector));
-				uint newlineMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, newlineVector));
-
-				uint combinedMask = separatorMask | escapeMask | newlineMask;
+				nuint combinedMask = separatorMask | escapeMask | newlineMask;
 
 				while (combinedMask != 0)
 				{
 					int index = BitOperations.TrailingZeroCount(combinedMask);
-					uint bit = (1u << index);
+					nuint bit = (nuint)1 << index;
 
 					if ((escapeMask & bit) != 0)
 					{
@@ -356,7 +377,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 			if (isEscaped)
 				continue;
 
-			if (c == (byte)',')
+			if (c == (byte)separatorChar)
 			{
 				fieldInfo[fieldCount++] = (fieldStart, i - fieldStart, wasOnceEscaped);
 

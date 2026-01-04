@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<PackageId>FourLambda.Csv</PackageId>
 		<Description>Ultra-high performance CSV parser</Description>
-		<Version>1.0</Version>
+		<Version>1.1.0</Version>
 		<Authors>Bepis, Four Lambda Software</Authors>
 		<Company>FourLambda</Company>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>

@@ -34,12 +34,24 @@ public class CompareTests
 		using var tr = new StreamReader(new MemoryStream(dataSource.Utf8Data));
 		using var sylvanReader = Sylvan.Data.Csv.CsvDataReader.Create(tr, new Sylvan.Data.Csv.CsvDataReaderOptions
 		{
-			HasHeaders = false
+			HasHeaders = dataSource.HasHeader
 		});
 
-		using var lambdaReader = new CsvReaderUtf8(new MemoryStream(dataSource.Utf8Data));
+		using var lambdaReader = new CsvReaderUtf8(new MemoryStream(dataSource.Utf8Data), dataSource.HasHeader);
 
 		int rowCount = 0;
+
+		if (dataSource.HasHeader)
+		{
+			var columnSchema = sylvanReader.GetColumnSchema();
+
+			Assert.That(lambdaReader.Headers.Count, Is.EqualTo(columnSchema.Count));
+
+			for (int i = 0; i < columnSchema.Count; i++)
+			{
+				Assert.That(lambdaReader.Headers.First(x => x.Value == i).Key, Is.EqualTo(columnSchema[i].ColumnName));
+			}
+		}
 
 		while (sylvanReader.Read())
 		{
@@ -76,12 +88,24 @@ public class CompareTests
 		using var tr = new MemoryTextReader(dataSource.Utf16Data);
 		using var sylvanReader = Sylvan.Data.Csv.CsvDataReader.Create(tr, new Sylvan.Data.Csv.CsvDataReaderOptions
 		{
-			HasHeaders = false
+			HasHeaders = dataSource.HasHeader
 		});
 
-		using var lambdaReader = new CsvReaderUtf16(new MemoryTextReader(dataSource.Utf16Data));
+		using var lambdaReader = new CsvReaderUtf16(new MemoryTextReader(dataSource.Utf16Data), dataSource.HasHeader);
 
 		int rowCount = 0;
+
+		if (dataSource.HasHeader)
+		{
+			var columnSchema = sylvanReader.GetColumnSchema();
+
+			Assert.That(lambdaReader.Headers.Count, Is.EqualTo(columnSchema.Count));
+
+			for (int i = 0; i < columnSchema.Count; i++)
+			{
+				Assert.That(lambdaReader.Headers.First(x => x.Value == i).Key, Is.EqualTo(columnSchema[i].ColumnName));
+			}
+		}
 
 		while (sylvanReader.Read())
 		{

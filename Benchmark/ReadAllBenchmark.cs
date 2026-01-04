@@ -86,7 +86,7 @@ public class CsvReadAllBenchmark : BenchmarkBase
 		while (dr.ReadNext())
 		{
 			for (int i = 0; i < dr.FieldCount; i++)
-				dr.GetRawSpan(i);
+				dr.GetSpanRaw(i);
 		}
 	}
 

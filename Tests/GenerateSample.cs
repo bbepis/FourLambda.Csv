@@ -126,6 +126,16 @@ internal class GenerateSamples
 			streamWriter.Write($"1,2,3,4");
 		}
 
+		using (var streamWriter = GetStreamWriter("compliance_no_headers.csv.zst"))
+		{
+			streamWriter.Write($"1,2,3,4\r\n");
+			streamWriter.Write($"1,2,3,4\r\n");
+			streamWriter.Write($"1,2,3,4\r\n");
+			streamWriter.Write($"1,2,3,4\r\n");
+			streamWriter.Write($"1,2,3,4\r\n");
+			streamWriter.Write($"1,2,3,4\r\n");
+		}
+
 		using (var streamWriter = GetStreamWriter("compliance_utf8_bom.csv.zst", new UTF8Encoding(true)))
 		{
 			streamWriter.Write($"column_1,column_2,column_3,column_4\r\n");

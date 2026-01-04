@@ -57,6 +57,7 @@ public class CsvDataSource
 	[
 		new ("compliance_no_cr.csv.zst", true, 4, 0),
 		new ("compliance_no_end_crlf.csv.zst", true, 4, 0),
+		new ("compliance_no_headers.csv.zst", false, 4, 0),
 		new ("compliance_utf8_bom.csv.zst", true, 4, 0),
 		new ("compliance_utf16_surrogate.csv.zst", true, 4, 0),
 	];
