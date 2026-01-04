@@ -69,11 +69,14 @@ public static class Program
 		public CsvConfig()
 		{
 			AddJob(Job.InProcess
+#if DEBUG
+				.WithWarmupCount(0)
+				.WithUnrollFactor(2)
+				.WithInvocationCount(2)
+				.WithIterationCount(1));
+#else
 				.WithWarmupCount(2)
 				.WithMinIterationCount(1)
-#if DEBUG
-				.WithMaxIterationCount(2));
-#else
 				.WithMaxIterationCount(20));
 #endif
 

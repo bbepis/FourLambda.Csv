@@ -9,11 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NReco.Csv" Version="1.0.3" />
     <PackageReference Include="Sep" Version="0.12.1" />
     <PackageReference Include="Sylvan.Data.Csv" Version="1.4.3" />
-    <PackageReference Include="ZstdSharp.Port" Version="0.8.6" />
+    <PackageReference Include="ZstdSharp.Port" Version="0.8.7" />
   </ItemGroup>
 
   <ItemGroup>

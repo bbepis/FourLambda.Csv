@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Globalization;
+using BenchmarkDotNet.Attributes;
 using FourLambda.Csv;
 using nietras.SeparatedValues;
 
@@ -128,6 +129,25 @@ public class CsvSkipToEndBenchmark : BenchmarkBase
 		return (records, fields);
 	}
 
+	[Benchmark, Library("NReco"), BenchmarkCategory("UTF8")]
+	public (int records, int fields) SkipToEnd_NReco_Utf8()
+	{
+		var reader = new NReco.Csv.CsvReader(new StreamReader(Utf8Stream));
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		int records = 0, fields = 0;
+
+		while (reader.Read())
+		{
+			records++;
+			fields += reader.FieldsCount;
+		}
+
+		return (records, fields);
+	}
+
 	[Benchmark, Library("NReco"), BenchmarkCategory("UTF16")]
 	public (int records, int fields) SkipToEnd_NReco_Utf16()
 	{
@@ -142,6 +162,44 @@ public class CsvSkipToEndBenchmark : BenchmarkBase
 		{
 			records++;
 			fields += reader.FieldsCount;
+		}
+
+		return (records, fields);
+	}
+
+	[Benchmark, Library("CsvHelper"), BenchmarkCategory("UTF8")]
+	public (int records, int fields) SkipToEnd_CsvHelper_Utf8()
+	{
+		using var reader = new CsvHelper.CsvReader(new StreamReader(Utf8Stream), CultureInfo.InvariantCulture);
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		int records = 0, fields = 0;
+
+		while (reader.Read())
+		{
+			records++;
+			fields += reader.ColumnCount;
+		}
+
+		return (records, fields);
+	}
+
+	[Benchmark, Library("CsvHelper"), BenchmarkCategory("UTF16")]
+	public (int records, int fields) SkipToEnd_CsvHelper_Utf16()
+	{
+		using var reader = new CsvHelper.CsvReader(Utf16Stream, CultureInfo.InvariantCulture);
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		int records = 0, fields = 0;
+
+		while (reader.Read())
+		{
+			records++;
+			fields += reader.ColumnCount;
 		}
 
 		return (records, fields);

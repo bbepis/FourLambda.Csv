@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Globalization;
+using BenchmarkDotNet.Attributes;
 using FourLambda.Csv;
 using nietras.SeparatedValues;
 
@@ -244,7 +245,7 @@ public class CsvReadAllBenchmark : BenchmarkBase
 			for (int i = 0; i < record.ColCount; i++)
 				str = record[i].Parse<string>();
 		}
-		
+
 		return str;
 	}
 
@@ -288,6 +289,25 @@ public class CsvReadAllBenchmark : BenchmarkBase
 		}
 	}
 
+	[Benchmark, Library("NReco"), BenchmarkCategory("string", "UTF8")]
+	public string ReadAll_NReco_String_Utf8()
+	{
+		var reader = new NReco.Csv.CsvReader(new StreamReader(Utf8Stream));
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		string str = string.Empty;
+
+		while (reader.Read())
+		{
+			for (int i = 0; i < reader.FieldsCount; i++)
+				str = reader[i];
+		}
+
+		return str;
+	}
+
 	[Benchmark, Library("NReco"), BenchmarkCategory("string", "UTF16")]
 	public string ReadAll_NReco_String_Utf16()
 	{
@@ -301,6 +321,44 @@ public class CsvReadAllBenchmark : BenchmarkBase
 		while (reader.Read())
 		{
 			for (int i = 0; i < reader.FieldsCount; i++)
+				str = reader[i];
+		}
+
+		return str;
+	}
+
+	[Benchmark, Library("CsvHelper"), BenchmarkCategory("string", "UTF8")]
+	public string ReadAll_CsvHelper_String_Utf8()
+	{
+		using var reader = new CsvHelper.CsvReader(new StreamReader(Utf8Stream), CultureInfo.InvariantCulture);
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		string str = string.Empty;
+
+		while (reader.Read())
+		{
+			for (int i = 0; i < reader.ColumnCount; i++)
+				str = reader[i];
+		}
+
+		return str;
+	}
+
+	[Benchmark, Library("CsvHelper"), BenchmarkCategory("string", "UTF16")]
+	public string ReadAll_CsvHelper_String_Utf16()
+	{
+		using var reader = new CsvHelper.CsvReader(Utf16Stream, CultureInfo.InvariantCulture);
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		string str = string.Empty;
+
+		while (reader.Read())
+		{
+			for (int i = 0; i < reader.ColumnCount; i++)
 				str = reader[i];
 		}
 

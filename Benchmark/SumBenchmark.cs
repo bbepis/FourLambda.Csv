@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Globalization;
+using BenchmarkDotNet.Attributes;
 using FourLambda.Csv;
 using nietras.SeparatedValues;
 
@@ -124,6 +125,24 @@ public class CsvSumBenchmark : BenchmarkBase
 		return sum;
 	}
 
+	[Benchmark, Library("NReco"), BenchmarkCategory("UTF8")]
+	public int Sum_NReco_Utf8()
+	{
+		var reader = new NReco.Csv.CsvReader(new StreamReader(Utf8Stream));
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		int sum = 0;
+
+		while (reader.Read())
+		{
+			sum += int.Parse(reader[dataSource.IntegerColumn]);
+		}
+
+		return sum;
+	}
+
 	[Benchmark, Library("NReco"), BenchmarkCategory("UTF16")]
 	public int Sum_NReco_Utf16()
 	{
@@ -137,6 +156,42 @@ public class CsvSumBenchmark : BenchmarkBase
 		while (reader.Read())
 		{
 			sum += int.Parse(reader[dataSource.IntegerColumn]);
+		}
+
+		return sum;
+	}
+
+	[Benchmark, Library("CsvHelper"), BenchmarkCategory("UTF8")]
+	public int Sum_CsvHelper_Utf8()
+	{
+		using var reader = new CsvHelper.CsvReader(new StreamReader(Utf8Stream), CultureInfo.InvariantCulture);
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		int sum = 0;
+
+		while (reader.Read())
+		{
+			sum += reader.GetField<int>(dataSource.IntegerColumn);
+		}
+
+		return sum;
+	}
+
+	[Benchmark, Library("CsvHelper"), BenchmarkCategory("UTF16")]
+	public int Sum_CsvHelper_Utf16()
+	{
+		using var reader = new CsvHelper.CsvReader(Utf16Stream, CultureInfo.InvariantCulture);
+
+		if (dataSource.HasHeader)
+			reader.Read();
+
+		int sum = 0;
+
+		while (reader.Read())
+		{
+			sum += reader.GetField<int>(dataSource.IntegerColumn);
 		}
 
 		return sum;
