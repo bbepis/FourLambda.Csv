@@ -54,7 +54,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		this.stream = stream;
 
 		maxBufferSize = bufferSize = currentBufferOffset = lineBufferSize;
-		bufferPtr = (byte*)NativeMemory.AlignedAlloc((nuint)maxBufferSize, 64);
+		bufferPtr = (byte*)NativeMemory.AlignedAlloc((nuint)maxBufferSize * 3, 64); // x1 for byte buffer, x2 for char unescape buffer = x3
 
 		fieldInfo = new (int offset, int length, bool isEscaped)[maxFieldCount];
 
@@ -195,7 +195,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		FieldCheck(field);
 		var info = fieldInfo[field];
 
-		Span<char> buffer = stackalloc char[info.length];
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
 		var length = UnescapeField(buffer, info);
 
 		return T.Parse(buffer.Slice(0, length), null);
@@ -215,7 +215,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		if (!info.isEscaped)
 			return T.Parse(new Span<byte>(bufferPtr + info.offset, info.length), null);
 
-		Span<char> buffer = stackalloc char[info.length];
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
 		var length = UnescapeField(buffer, info);
 
 		return T.Parse(buffer.Slice(0, length), null);
@@ -240,6 +240,22 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	}
 
 	/// <summary>
+	/// Retrieves the specified field as a <see cref="Span{char}"/>, unescaping if necessary.
+	/// </summary>
+	/// <param name="field">The index of the field to retrieve.</param>
+	/// <returns>The unescaped text data of the specified field.</returns>
+	public ReadOnlySpan<char> GetSpan(int field)
+	{
+		FieldCheck(field);
+		var info = fieldInfo[field];
+
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
+		var length = UnescapeField(buffer, info);
+
+		return buffer.Slice(0, length);
+	}
+
+	/// <summary>
 	/// Retrieves the specified field as a <see cref="Span{byte}"/> containing UTF-8 data, without performing any unescaping regardless of if the field needs it.
 	/// </summary>
 	/// <param name="field">The index of the field to retrieve.</param>
@@ -261,7 +277,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		if (!info.isEscaped)
 			return Encoding.UTF8.GetString(new Span<byte>(bufferPtr + info.offset, info.length));
 
-		Span<char> buffer = stackalloc char[info.length];
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
 		var length = UnescapeField(buffer, info);
 
 		return new string(buffer.Slice(0, length));
@@ -302,7 +318,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 			//throw new Exception($"Could not parse field as DateTime: {Encoding.UTF8.GetString(span)}");
 		}
 
-		Span<char> buffer = stackalloc char[info.length];
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
 		var bufferLength = UnescapeField(buffer, info);
 		return DateTime.Parse(buffer.Slice(0, bufferLength));
 	}

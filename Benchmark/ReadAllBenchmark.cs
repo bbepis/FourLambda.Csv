@@ -27,6 +27,21 @@ public class CsvReadAllBenchmark : BenchmarkBase
 		return str;
 	}
 
+	[Benchmark, Library("FourLambda.Csv"), BenchmarkCategory("span", "UTF8")]
+	public void ReadAll_FourLambda_Span_Utf8()
+	{
+		using var dr = new CsvReaderUtf8(Utf8Stream, lineBufferSize: BufferSize, maxFieldCount: dataSource.MaxFieldCount);
+
+		if (dataSource.HasHeader)
+			dr.ReadNext(); // strip the header row
+
+		while (dr.ReadNext())
+		{
+			for (int i = 0; i < dr.FieldCount; i++)
+				dr.GetSpan(i);
+		}
+	}
+
 	[Benchmark, Library("FourLambda.Csv"), BenchmarkCategory("span-raw", "UTF8")]
 	public void ReadAll_FourLambda_SpanRaw_Utf8()
 	{

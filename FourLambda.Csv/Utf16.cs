@@ -48,7 +48,7 @@ public sealed unsafe class CsvReaderUtf16 : ICsvReader
 		this.reader = reader;
 
 		maxBufferSize = bufferSize = currentBufferOffset = lineBufferSize;
-		bufferPtr = (char*)NativeMemory.AlignedAlloc((nuint)maxBufferSize * sizeof(char), 64);
+		bufferPtr = (char*)NativeMemory.AlignedAlloc((nuint)maxBufferSize * 2 * sizeof(char), 64); // x1 for byte buffer, x1 for char unescape buffer = x2
 
 		fieldInfo = new (int offset, int length, byte escapedCount)[maxFieldCount];
 
@@ -181,7 +181,7 @@ public sealed unsafe class CsvReaderUtf16 : ICsvReader
 		if (TryGetUnescapedSpanFast(field, out var info, out var span))
 			T.Parse(span, null);
 
-		Span<char> buffer = stackalloc char[info.length];
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
 		int length = UnescapeField(buffer, info);
 
 		return T.Parse(buffer.Slice(0, length), null);
@@ -245,7 +245,7 @@ public sealed unsafe class CsvReaderUtf16 : ICsvReader
 		if (TryGetUnescapedSpanFast(field, out var info, out var span))
 			return span;
 
-		Span<char> buffer = new char[info.length];
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
 		var length = UnescapeField(buffer, info);
 
 		return buffer.Slice(0, length);

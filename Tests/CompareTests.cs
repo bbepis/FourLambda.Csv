@@ -65,6 +65,9 @@ public class CompareTests
 				var actual = lambdaReader.GetString(i);
 				Assert.That(actual, Is.EqualTo(expected));
 
+				actual = lambdaReader.GetSpan(i).ToString();
+				Assert.That(actual, Is.EqualTo(expected));
+
 				lambdaReader.NeedsEscape(i, out var rawLength);
 
 				using var charBuffer = MemoryPool<char>.Shared.Rent(rawLength);

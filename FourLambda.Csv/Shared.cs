@@ -48,6 +48,13 @@ public interface ICsvReader : IDisposable
 	int WriteToSpan(int field, Span<char> destination);
 
 	/// <summary>
+	/// Retrieves the specified field as a <see cref="Span{char}"/>, unescaping if necessary.
+	/// </summary>
+	/// <param name="field">The index of the field to retrieve.</param>
+	/// <returns>The unescaped text data of the specified field.</returns>
+	ReadOnlySpan<char> GetSpan(int field);
+
+	/// <summary>
 	/// Retrieves the specified field as a string, unescaping if necessary.
 	/// </summary>
 	/// <param name="field">The index of the field to retrieve.</param>
