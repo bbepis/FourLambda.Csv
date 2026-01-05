@@ -51,16 +51,22 @@
 
 <div class="lg:flex h-dvh">
     <div class="flex flex-col lg:w-[48rem] p-4 overflow-y-auto bg-[#222]">
-        <h2>.NET CSV benchmark</h2>
+        <h2 class="mb-0">.NET CSV benchmark</h2>
+        <div class="mb-3">
+            <a href="https://github.com/bbepis/FourLambda.Csv/tree/master/Benchmark">Benchmark source</a><br/>
+            Test last run {benchmarkData.lastrun}
+        </div>
 
-        <div class="pb-1">Test last run 01/01/2026</div>
-        <div>
+        <div class="mb-2">
             Libraries compared:
-            <ul>
-                <li><a href="https://github.com/MarkPflug/Sylvan/blob/main/docs/Csv/Sylvan.Data.Csv.md">Sylvan.Data.Csv v1.4.3</a></li>
-                <li><a href="https://github.com/nietras/Sep/">Sep v0.12.1</a></li>
-                <li><a href="https://github.com/bbepis/FourLambda.Csv">FourLambda.Csv v1.0</a></li>
-            </ul>
+            <div class="library-list">
+                <div><a href="https://github.com/MarkPflug/Sylvan/blob/main/docs/Csv/Sylvan.Data.Csv.md">Sylvan.Data.Csv v1.4.3</a></div>
+                <div><a href="https://github.com/nietras/Sep/">Sep v0.12.1</a></div>
+                <div><a href="https://github.com/bbepis/FourLambda.Csv">FourLambda.Csv v1.1.0</a></div>
+                <div><a href="https://github.com/nreco/csv">NReco.Csv v1.0.3</a></div>
+                <div><a href="https://github.com/JoshClose/CsvHelper">CsvHelper v33.1.0</a></div>
+                <div></div>
+            </div>
         </div>
 
         <div class="flex flex-col overflow-y-auto bg-[#181818]">
@@ -76,7 +82,7 @@
             {/each}
         </div>
     </div>
-    <div class="flex grow flex-col pt-12 pb-16 px-16 overflow-y-auto">
+    <div class="flex grow flex-col pt-12 pb-16 px-2 lg:px-16 overflow-y-auto">
         {#snippet printDataset(results: BenchmarkResult[])}
             {#if !results}
                 N/A
@@ -87,41 +93,43 @@
                     {@const timeUnit = TimeUnits[Math.floor(Math.log(0.1 * filteredResults.map(x => x.meanNs).reduce((a, b) => Math.min(a, b))) / Math.log(1000))]}
                     {@const allocationUnit = ByteUnits[Math.max(1, Math.floor(Math.log(filteredResults.map(x => x.allocated).reduce((a, b) => Math.min(a, b))) / Math.log(1024)))]}
                     <b class="block my-2" class:mt-4={i > 0}>{permutation.join(" / ")}</b>
-                    <table class="result-table">
-                        <colgroup>
-                            <col style="width: 3%;">
-                            <col style="width: 17%;">
-                            <col style="width: auto;">
-                            <col style="width: 10%;">
-                            <col style="width: 19%;">
-                            <col style="width: 19%;">
-                            <col style="width: 19%;">
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th colspan="2">Library</th>
-                            <th colspan="2">Speed</th>
-                            <th>Mean</th>
-                            <th>Error</th>
-                            <th>Allocations</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each filteredResults as result, i}
-                            {@const dataSize = permutation.includes("UTF16") ? selectedDataset.utf16size : selectedDataset.utf8size}
-                            {@const speed = dataSize / (result.meanNs / 1_000_000_000)}
-                            <tr>
-                                <td class="border-r-transparent!">#{i + 1}</td>
-                                <td>{result.library}</td>
-                                <td class="border-r-transparent!">{formatBytes(speed, { unit: "MB", decimals: 2 })}/s</td>
-                                <td class="text-right">±{formatBytes(speed * (result.errorNs / result.meanNs), { unit: "MB", decimals: 2 })}/s</td>
-                                <td>{formatNs(result.meanNs, { decimals: 3, unit: timeUnit })}</td>
-                                <td>{formatNs(result.errorNs, { decimals: 3, unit: timeUnit })}</td>
-                                <td>{formatBytes(result.allocated, { decimals: 2, unit: allocationUnit })}</td>
+                    <div class="w-full overflow-x-auto">
+                        <table class="result-table">
+                            <colgroup>
+                                <col style="width: 3%;">
+                                <col style="width: 17%;">
+                                <col style="width: auto;">
+                                <col style="width: 10%;">
+                                <col style="width: 19%;">
+                                <col style="width: 19%;">
+                                <col style="width: 19%;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th colspan="2">Library</th>
+                                <th colspan="2">Speed</th>
+                                <th>Mean</th>
+                                <th>Error</th>
+                                <th>Allocations</th>
                             </tr>
-                        {/each}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {#each filteredResults as result, i}
+                                {@const dataSize = permutation.includes("UTF16") ? selectedDataset.utf16size : selectedDataset.utf8size}
+                                {@const speed = dataSize / (result.meanNs / 1_000_000_000)}
+                                <tr>
+                                    <td class="border-r-transparent!">#{i + 1}</td>
+                                    <td>{result.library}</td>
+                                    <td class="border-r-transparent!">{formatBytes(speed, { unit: "MB", decimals: 2 })}/s</td>
+                                    <td class="text-right">±{formatBytes(speed * (result.errorNs / result.meanNs), { unit: "MB", decimals: 2 })}/s</td>
+                                    <td>{formatNs(result.meanNs, { decimals: 3, unit: timeUnit })}</td>
+                                    <td>{formatNs(result.errorNs, { decimals: 3, unit: timeUnit })}</td>
+                                    <td>{formatBytes(result.allocated, { decimals: 2, unit: allocationUnit })}</td>
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
+                </div>
             {/each}
             {/if}
         {/snippet}
@@ -129,7 +137,7 @@
             <div>
                 Benchmark environment:
 
-                <pre>
+                <pre class="wrap-break-word whitespace-pre-wrap">
 BenchmarkDotNet v0.15.8, Windows 10 (10.0.19044.6575/21H2/November2021Update)
 AMD Ryzen 7 9700X 3.80GHz, 1 CPU, 16 logical and 8 physical cores
 .NET SDK 10.0.101
@@ -197,8 +205,17 @@ AMD Ryzen 7 9700X 3.80GHz, 1 CPU, 16 logical and 8 physical cores
 </div>
 
 <style lang="scss">
-    .subtext {
-        color: #999;
+    .library-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background-color: var(--border-color);
+        border: 2px solid var(--border-color);
+        gap: 2px;
+
+        & > div {
+            background-color: #222;
+            padding: 0.2em;
+        }
     }
 
     .result-table {

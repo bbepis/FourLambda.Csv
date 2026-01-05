@@ -7,7 +7,6 @@
 	--color-text: var(--text-color);
 	--color-highlight: var(--highlight-color);
 	--color-selected: var(--selected-color);
-	--color-box-header: var(--box-header-background-color);
 	--color-post-border: var(--border-color);
 }
 
