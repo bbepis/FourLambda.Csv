@@ -16,11 +16,15 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	private int currentBufferSize;
 	private int currentBufferOffset;
 
-	private readonly (int offset, int length, bool isEscaped)[] fieldInfo;
+	// escapedCount
+	// bit 8 = unicode detected
+	// bit 1-7 = escape count
+	private readonly (int offset, int length, byte escapedCount)[] fieldInfo;
 	private int fieldCount = 0;
 
 	private readonly char separatorChar;
 
+	private readonly Vector256<byte> nonAsciiVector;
 	private readonly Vector256<byte> separatorVector;
 	private readonly Vector256<byte> escapeVector;
 	private readonly Vector256<byte> newlineVector;
@@ -56,7 +60,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		maxBufferSize = bufferSize = currentBufferOffset = lineBufferSize;
 		bufferPtr = (byte*)NativeMemory.AlignedAlloc((nuint)maxBufferSize * 3, 64); // x1 for byte buffer, x2 for char unescape buffer = x3
 
-		fieldInfo = new (int offset, int length, bool isEscaped)[maxFieldCount];
+		fieldInfo = new (int offset, int length, byte escapedCount)[maxFieldCount];
 
 		if ((ushort)separatorChar > 127)
 			throw new ArgumentOutOfRangeException(nameof(separatorChar), "Separator character must be within ASCII range.");
@@ -65,6 +69,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 
 		if (Avx2.IsSupported)
 		{
+			nonAsciiVector = Vector256.Create((byte)0x80);
 			separatorVector = Vector256.Create((byte)separatorChar);
 			newlineVector = Vector256.Create((byte)'\n');
 			escapeVector = Vector256.Create((byte)'\"');
@@ -189,16 +194,33 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 			throw new ArgumentOutOfRangeException(nameof(field), $"Field {field} is greater than the actual range of fields for the line ({fieldCount})");
 	}
 
+	private bool TryGetUnescapedSpanFast(int field, out (int offset, int length, byte escapedCount) info, out Span<byte> span)
+	{
+		FieldCheck(field);
+		info = fieldInfo[field];
+
+		// no non-ASCII characters and no quotes
+		if (info.escapedCount == 0)
+		{
+			span = new Span<byte>(bufferPtr + info.offset, info.length);
+			return true;
+		}
+
+		// no non-ASCII characters and 2 quotes; check if it's only enclosing
+		if (info.escapedCount == 2 && bufferPtr[info.offset] == '\"' && bufferPtr[info.offset + info.length - 1] == '\"')
+		{
+			span = new Span<byte>(bufferPtr + info.offset + 1, info.length - 2);
+			return true;
+		}
+
+		span = default;
+		return false;
+	}
+
 	/// <inheritdoc/>
 	public T Parse<T>(int field) where T : ISpanParsable<T>
 	{
-		FieldCheck(field);
-		var info = fieldInfo[field];
-
-		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
-		var length = UnescapeField(buffer, info);
-
-		return T.Parse(buffer.Slice(0, length), null);
+		return T.Parse(GetSpan(field), null);
 	}
 
 	/// <summary>
@@ -209,11 +231,8 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	/// <returns>The parsed value of the specified field.</returns>
 	public T ParseUtf8<T>(int field) where T : IUtf8SpanParsable<T>, ISpanParsable<T>
 	{
-		FieldCheck(field);
-		var info = fieldInfo[field];
-
-		if (!info.isEscaped)
-			return T.Parse(new Span<byte>(bufferPtr + info.offset, info.length), null);
+		if (TryGetUnescapedSpanFast(field, out var info, out var utf8span))
+			return T.Parse(utf8span, null);
 
 		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
 		var length = UnescapeField(buffer, info);
@@ -224,19 +243,17 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	/// <inheritdoc/>
 	public bool NeedsEscape(int field, out int rawLength)
 	{
-		FieldCheck(field);
-		var info = fieldInfo[field];
+		var result = TryGetUnescapedSpanFast(field, out var info, out _);
 		rawLength = info.length;
-		return info.isEscaped;
+		return result;
 	}
 
 	/// <inheritdoc/>
 	public int WriteToSpan(int field, Span<char> destination)
 	{
-		FieldCheck(field);
-		var info = fieldInfo[field];
+		TryGetUnescapedSpanFast(field, out var info, out var fastSpan);
 
-		return UnescapeField(destination, info);
+		return UnescapeField(destination, info, fastSpan);
 	}
 
 	/// <summary>
@@ -246,11 +263,10 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	/// <returns>The unescaped text data of the specified field.</returns>
 	public ReadOnlySpan<char> GetSpan(int field)
 	{
-		FieldCheck(field);
-		var info = fieldInfo[field];
+		TryGetUnescapedSpanFast(field, out var info, out var fastSpan);
 
 		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
-		var length = UnescapeField(buffer, info);
+		var length = UnescapeField(buffer, info, fastSpan);
 
 		return buffer.Slice(0, length);
 	}
@@ -271,11 +287,8 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	/// <inheritdoc/>
 	public string GetString(int field)
 	{
-		FieldCheck(field);
-		var info = fieldInfo[field];
-
-		if (!info.isEscaped)
-			return Encoding.UTF8.GetString(new Span<byte>(bufferPtr + info.offset, info.length));
+		if (TryGetUnescapedSpanFast(field, out var info, out var fastSpan))
+			return Encoding.UTF8.GetString(fastSpan);
 
 		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
 		var length = UnescapeField(buffer, info);
@@ -307,19 +320,16 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	/// <inheritdoc/>
 	public DateTime GetDateTime(int field)
 	{
-		var info = fieldInfo[field];
-
-		if (!info.isEscaped)
+		if (TryGetUnescapedSpanFast(field, out var info, out var fastSpan))
 		{
-			var span = GetSpanRaw(field);
-			if (Utf8Parser.TryParse(span, out DateTime value, out _))
+			if (Utf8Parser.TryParse(fastSpan, out DateTime value, out _))
 				return value;
 
 			//throw new Exception($"Could not parse field as DateTime: {Encoding.UTF8.GetString(span)}");
 		}
 
 		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
-		var bufferLength = UnescapeField(buffer, info);
+		var bufferLength = UnescapeField(buffer, info, fastSpan);
 		return DateTime.Parse(buffer.Slice(0, bufferLength));
 	}
 
@@ -327,8 +337,8 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 	{
 		int endChar = -1;
 		int fieldStart = bufferOffset;
-		bool wasOnceEscaped = false;
-		bool isEscaped = false;
+		byte escapedControl = 0;
+		bool currentlyEscaped = false;
 		fieldCount = 0;
 
 		int i = bufferOffset;
@@ -341,6 +351,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 				nuint separatorMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, separatorVector));
 				nuint escapeMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, escapeVector));
 				nuint newlineMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, newlineVector));
+				nuint nonAsciiMask = (uint)Avx2.MoveMask(Avx2.CompareEqual(dataVector, nonAsciiVector));
 
 				nuint combinedMask = separatorMask | escapeMask | newlineMask;
 
@@ -351,21 +362,28 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 
 					if ((escapeMask & bit) != 0)
 					{
-						isEscaped = !isEscaped;
-						wasOnceEscaped = true;
+						currentlyEscaped = !currentlyEscaped;
+
+						byte escapedCount = (byte)(escapedControl & 0x7F);
+						if (escapedCount < 0x7F)
+							escapedControl = (byte)((escapedControl & 0x80) | (escapedCount + 1));
 
 						goto continueLoop;
 					}
 
-					if (isEscaped)
+					if (currentlyEscaped)
 						goto continueLoop;
 
 					if ((separatorMask & bit) != 0)
 					{
-						fieldInfo[fieldCount++] = (fieldStart, i + index - fieldStart, wasOnceEscaped);
+						fieldInfo[fieldCount++] = (fieldStart, i + index - fieldStart, escapedControl);
 
 						fieldStart = i + index + 1;
-						wasOnceEscaped = false;
+						escapedControl = 0;
+
+						// TODO: smarter non-ascii detection
+						if (nonAsciiMask > 0)
+							escapedControl |= 0x80;
 					}
 					else if ((newlineMask & bit) != 0)
 					{
@@ -376,29 +394,42 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 					continueLoop:
 					combinedMask &= ~bit; // clear this bit
 				}
+
+				// TODO: smarter non-ascii detection
+				if (nonAsciiMask > 0)
+					escapedControl |= 0x80;
+
 			}
 
 		for (; i < bufferSize; i++)
 		{
 			byte c = bufferPtr[i];
 
+			if ((c & 0x80) != 0)
+			{
+				escapedControl |= 0x80;
+			}
+
 			if (c == (byte)'"')
 			{
-				isEscaped = !isEscaped;
-				wasOnceEscaped = true;
+				currentlyEscaped = !currentlyEscaped;
+
+				byte escapedCount = (byte)(escapedControl & 0x7F);
+				if (escapedCount < 0x7F)
+					escapedControl = (byte)((escapedControl & 0x80) | (escapedCount + 1));
 
 				continue;
 			}
 
-			if (isEscaped)
+			if (currentlyEscaped)
 				continue;
 
 			if (c == (byte)separatorChar)
 			{
-				fieldInfo[fieldCount++] = (fieldStart, i - fieldStart, wasOnceEscaped);
+				fieldInfo[fieldCount++] = (fieldStart, i - fieldStart, escapedControl);
 
 				fieldStart = i + 1;
-				wasOnceEscaped = false;
+				escapedControl = 0;
 			}
 
 			if (c == (byte)'\n')
@@ -415,13 +446,21 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 			crPadding = endChar > 0 && bufferPtr[endChar - 1] == '\r' ? 1 : 0;
 		}
 
-		fieldInfo[fieldCount++] = (fieldStart, (endChar < 0 ? bufferSize : endChar - crPadding) - fieldStart, wasOnceEscaped);
+		fieldInfo[fieldCount++] = (fieldStart, (endChar < 0 ? bufferSize : endChar - crPadding) - fieldStart, escapedControl);
 
 		return endChar;
 	}
 
-	private int UnescapeField(Span<char> destination, (int offset, int length, bool isEscaped) info)
+	private int UnescapeField(Span<char> destination, (int offset, int length, byte escapedCount) info, Span<byte> fastEscaped = default)
 	{
+		// TODO: fast version when only ascii & no quotes (escapedCount == 0)
+
+		if ((info.escapedCount & 0x7F) == 0)
+		{
+			// non-ascii detected, but no quotes
+			return Encoding.UTF8.GetChars(fastEscaped, destination);
+		}
+
 		int idx = 0;
 		int rawLength = info.offset + info.length;
 
