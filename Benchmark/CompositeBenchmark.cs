@@ -9,13 +9,16 @@ namespace Benchmark;
 [BenchmarkKey("composite")]
 public class CsvCompositeBenchmark
 {
-	private readonly CsvDataSource dataSource;
-
-	public CsvCompositeBenchmark()
+	public static IEnumerable<CsvDataSource> BenchmarkSourcesLoaded()
 	{
-		dataSource = CsvDataSource.BenchmarkSources.First(x => x.Filename == "65K_Records_Data.csv.zst");
+		var dataSource = CsvDataSource.BenchmarkSources.First(x => x.Filename == "65K_Records_Data.csv.zst");
 		dataSource.Load();
+
+		yield return dataSource;
 	}
+
+	[ParamsSource(nameof(BenchmarkSourcesLoaded))]
+	public CsvDataSource dataSource;
 
 	protected MemoryStream Utf8Stream => new MemoryStream(dataSource.Utf8Data);
 	protected TextReader Utf16Stream => new MemoryTextReader(dataSource.Utf16Data);

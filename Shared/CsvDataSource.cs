@@ -8,18 +8,22 @@ public class CsvDataSource
 	public readonly bool HasHeader;
 	public readonly int MaxFieldCount;
 	public readonly int IntegerColumn;
+	public readonly string? FormatDescription;
+	public readonly string? Description;
 
 	public byte[] Utf8Data;
 	public ReadOnlyMemory<char> Utf16Data;
 
 	//public CsvDataSource() { }
 
-	public CsvDataSource(string filename, bool hasHeader, int maxFieldCount, int integerColumn)
+	public CsvDataSource(string filename, bool hasHeader, int maxFieldCount, int integerColumn, string formatDescription = null, string description = null)
 	{
 		Filename = filename;
 		HasHeader = hasHeader;
 		MaxFieldCount = maxFieldCount;
 		IntegerColumn = integerColumn;
+		FormatDescription = formatDescription;
+		Description = description;
 	}
 
 	private static readonly string SampleDirectory =
@@ -44,13 +48,13 @@ public class CsvDataSource
 
 	public static CsvDataSource[] BenchmarkSources =>
 	[
-		new ("reddit_subset.csv.zst", true, 24, 6),
-		new ("mixed_unicode.csv.zst", true, 4, 0),
-		new ("65K_Records_Data.csv.zst", true, 16, 8),
-		new ("synthetic_thin_numeric.csv.zst", true, 4, 0),
-		new ("synthetic_short_numeric.csv.zst", true, 4, 0),
-		new ("synthetic_quoted_numeric.csv.zst", true, 4, 0),
-		new ("synthetic_complex.csv.zst", true, 4, 0),
+		new ("reddit_subset.csv.zst", true, 24, 6, "22 columns, 16,781 rows", "'RC_2008-01.ndjson' from the Arctic Shift reddit dump converted to CSV format. Meant to represent real-world data processing, and contains a very diverse range of long, complex text."),
+		new ("mixed_unicode.csv.zst", true, 4, 0, "4 columns, 52,524 rows", "'item_flavor_text.csv' from the Veekun/pokedex GitHub repo. Contains medium-length text in many different languages & scripts, with many newlines."),
+		new ("65K_Records_Data.csv.zst", true, 16, 8, "14 columns, 65,535 rows", "Example CSV dataset used by MarkPflug/Benchmarks to benchmark .NET CSV libraries. Contains sample financial record data."),
+		new ("synthetic_thin_numeric.csv.zst", true, 4, 0, "4 columns, 50,000 rows", "An artificially generated dataset consisting of 4 columns containing integers ranging from 0 - 2000."),
+		new ("synthetic_short_numeric.csv.zst", true, 4, 0, "4 columns, 50 rows", "An artificially generated dataset consisting of 4 columns containing integers ranging from 0 - 2000. Short to show overall library overhead."),
+		new ("synthetic_quoted_numeric.csv.zst", true, 4, 0, "4 columns, 50,000 rows", "An artificially generated dataset consisting of 4 columns containing integers ranging from 0 - 2000, with each column wrapped in quotation marks for escaping."),
+		new ("synthetic_complex.csv.zst", true, 4, 0, "4 columns, 50,000 rows", "An artificially generated dataset consisting of 1 column with a number, and 3 containing very large escaped text designed to be extremely challenging for a parser to scan through."),
 	];
 
 	public static CsvDataSource[] TestSources =>

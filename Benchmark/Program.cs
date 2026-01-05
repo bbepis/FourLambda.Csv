@@ -18,16 +18,20 @@ public static class Program
 
 		JObject compiledData = new();
 
+		compiledData["lastrun"] = DateTime.Now.ToString("dd/MM/yyyy");
+
 		var datasetObject = compiledData["datasets"] = new JObject();
 
 		foreach (var dataset in CsvDataSource.BenchmarkSources)
 		{
 			dataset.Load();
 
-			datasetObject[dataset.Filename] = new JObject
+			datasetObject[dataset.Filename.Replace(".zst", "")] = new JObject
 			{
 				["utf8size"] = dataset.Utf8Data.Length,
-				["utf16size"] = dataset.Utf16Data.Length * sizeof(char)
+				["utf16size"] = dataset.Utf16Data.Length * sizeof(char),
+				["formatDesc"] = dataset.FormatDescription,
+				["description"] = dataset.Description
 			};
 		}
 
@@ -37,10 +41,18 @@ public static class Program
 		{
 			var testSuiteKey = result.Reports[0].BenchmarkCase.Descriptor.Type.GetCustomAttribute<BenchmarkKeyAttribute>()?.BenchmarkKey ?? throw new Exception("Unknown key");
 
-			var keyedResults = (JArray)(resultObject[testSuiteKey] = new JArray());
+			var keyedResults = (JObject)(resultObject[testSuiteKey] = new JObject());
 
 			foreach (var report in result.Reports)
 			{
+				string datasetName = ((CsvDataSource)report.BenchmarkCase.Parameters[0].Value).Filename.Replace(".zst", "");
+
+				if (keyedResults[datasetName] is not JArray datasetArray)
+				{
+					datasetArray = new JArray();
+					keyedResults[datasetName] = datasetArray;
+				}
+
 				var libraryName = report.BenchmarkCase.Descriptor.WorkloadMethod.GetCustomAttribute<LibraryAttribute>()?.LibraryName ?? "<??>";
 				
 				var reportObject = new JObject
@@ -52,12 +64,7 @@ public static class Program
 					["allocated"] = (ulong)report.Metrics["Allocated Memory"].Value
 				};
 
-				if (report.BenchmarkCase.HasParameters)
-				{
-					reportObject["dataset"] = ((CsvDataSource)report.BenchmarkCase.Parameters[0].Value).Filename;
-				}
-
-				keyedResults.Add(reportObject);
+				datasetArray.Add(reportObject);
 			}
 		}
 
