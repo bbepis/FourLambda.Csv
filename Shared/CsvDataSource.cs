@@ -44,6 +44,17 @@ public class CsvDataSource
 
 		Utf8Data = memoryStream.ToArray();
 		Utf16Data = Encoding.UTF8.GetString(Utf8Data).AsMemory();
+
+		var byteOrderMark = Utf16Data.Span[0];
+
+		if (byteOrderMark == '\uFEFF' || byteOrderMark == '\uFFFE')
+		{
+			// Although we explicitly handle UTF-8 BOM, I don't think we should test for UTF-16 BOM.
+			// - StreamReader automatically strips it if it encounters it
+			// - Sylvan.Data.Csv passes it through as-is and doesn't throw exceptions on it
+
+			Utf16Data = Utf16Data.Slice(1);
+		}
 	}
 
 	public static CsvDataSource[] BenchmarkSources =>
