@@ -76,6 +76,18 @@ public class CompareTests
 				Assert.That(actual, Is.EqualTo(expected));
 			}
 
+			// can't think of a better way to test this
+			// make sure that spans don't clobber each other after generating each
+			var span1 = lambdaReader.GetSpan(0);
+			var span2 = lambdaReader.GetSpan(1);
+			var span3 = lambdaReader.GetSpan(2);
+			var span4 = lambdaReader.GetSpan(3);
+
+			Assert.That(span1.ToString(), Is.EqualTo(sylvanReader.GetString(0)));
+			Assert.That(span2.ToString(), Is.EqualTo(sylvanReader.GetString(1)));
+			Assert.That(span3.ToString(), Is.EqualTo(sylvanReader.GetString(2)));
+			Assert.That(span4.ToString(), Is.EqualTo(sylvanReader.GetString(3)));
+
 			rowCount++;
 		}
 

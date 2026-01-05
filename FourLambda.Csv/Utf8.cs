@@ -195,7 +195,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		FieldCheck(field);
 		var info = fieldInfo[field];
 
-		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
 		var length = UnescapeField(buffer, info);
 
 		return T.Parse(buffer.Slice(0, length), null);
@@ -215,7 +215,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		if (!info.isEscaped)
 			return T.Parse(new Span<byte>(bufferPtr + info.offset, info.length), null);
 
-		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
 		var length = UnescapeField(buffer, info);
 
 		return T.Parse(buffer.Slice(0, length), null);
@@ -249,7 +249,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		FieldCheck(field);
 		var info = fieldInfo[field];
 
-		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
 		var length = UnescapeField(buffer, info);
 
 		return buffer.Slice(0, length);
@@ -277,7 +277,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		if (!info.isEscaped)
 			return Encoding.UTF8.GetString(new Span<byte>(bufferPtr + info.offset, info.length));
 
-		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
 		var length = UnescapeField(buffer, info);
 
 		return new string(buffer.Slice(0, length));
@@ -318,7 +318,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 			//throw new Exception($"Could not parse field as DateTime: {Encoding.UTF8.GetString(span)}");
 		}
 
-		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset, info.length);
+		Span<char> buffer = new Span<char>(bufferPtr + maxBufferSize + info.offset * 2, info.length);
 		var bufferLength = UnescapeField(buffer, info);
 		return DateTime.Parse(buffer.Slice(0, bufferLength));
 	}
