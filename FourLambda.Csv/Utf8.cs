@@ -199,15 +199,17 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 		FieldCheck(field);
 		info = fieldInfo[field];
 
-		// no non-ASCII characters and no quotes
-		if (info.escapedCount == 0)
+		nint quoteMask = info.escapedCount & 0x7F;
+
+		// no quotes
+		if (quoteMask == 0)
 		{
 			span = new Span<byte>(bufferPtr + info.offset, info.length);
 			return true;
 		}
 
-		// no non-ASCII characters and 2 quotes; check if it's only enclosing
-		if (info.escapedCount == 2 && bufferPtr[info.offset] == '\"' && bufferPtr[info.offset + info.length - 1] == '\"')
+		//  2 quotes; check if it's only enclosing
+		if (quoteMask == 2 && bufferPtr[info.offset] == '\"' && bufferPtr[info.offset + info.length - 1] == '\"')
 		{
 			span = new Span<byte>(bufferPtr + info.offset + 1, info.length - 2);
 			return true;
@@ -335,9 +337,9 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 
 	private int DetermineFields(int bufferOffset)
 	{
-		int endChar = -1;
-		int fieldStart = bufferOffset;
-		byte escapedControl = 0;
+		nint endChar = -1;
+		nint fieldStart = bufferOffset;
+		nint escapedControl = 0;
 		bool currentlyEscaped = false;
 		fieldCount = 0;
 
@@ -376,7 +378,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 
 					if ((separatorMask & bit) != 0)
 					{
-						fieldInfo[fieldCount++] = (fieldStart, i + index - fieldStart, escapedControl);
+						fieldInfo[fieldCount++] = ((int)fieldStart, (int)(i + index - fieldStart), (byte)escapedControl);
 
 						fieldStart = i + index + 1;
 						escapedControl = 0;
@@ -408,6 +410,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 			if ((c & 0x80) != 0)
 			{
 				escapedControl |= 0x80;
+				continue;
 			}
 
 			if (c == (byte)'"')
@@ -426,7 +429,7 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 
 			if (c == (byte)separatorChar)
 			{
-				fieldInfo[fieldCount++] = (fieldStart, i - fieldStart, escapedControl);
+				fieldInfo[fieldCount++] = ((int)fieldStart, (int)(i - fieldStart), (byte)escapedControl);
 
 				fieldStart = i + 1;
 				escapedControl = 0;
@@ -446,9 +449,9 @@ public sealed unsafe class CsvReaderUtf8 : ICsvReader
 			crPadding = endChar > 0 && bufferPtr[endChar - 1] == '\r' ? 1 : 0;
 		}
 
-		fieldInfo[fieldCount++] = (fieldStart, (endChar < 0 ? bufferSize : endChar - crPadding) - fieldStart, escapedControl);
+		fieldInfo[fieldCount++] = ((int)fieldStart, (int)((endChar < 0 ? bufferSize : endChar - crPadding) - fieldStart), (byte)escapedControl);
 
-		return endChar;
+		return (int)endChar;
 	}
 
 	private int UnescapeField(Span<char> destination, (int offset, int length, byte escapedCount) info, Span<byte> fastEscaped = default)
